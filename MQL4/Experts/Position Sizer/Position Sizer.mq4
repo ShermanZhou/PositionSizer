@@ -937,7 +937,14 @@ void OnChartEvent(const int id,
     }
 
     // Call Panel's event handler only if it is not a CHARTEVENT_CHART_CHANGE - workaround for minimization bug on chart switch.
-    if (id != CHARTEVENT_CHART_CHANGE) ExtDialog.OnEvent(id, lparam, dparam, sparam);
+
+    if (id != CHARTEVENT_CHART_CHANGE){
+       // zzz: Profiler showed this call is 140% CPU, throttle it to fix freeze
+       if (GetTickCount() - LastRecalculationTime > 20)
+       {
+           ExtDialog.OnEvent(id, lparam, dparam, sparam);
+       }
+    } 
     
     // Recalculate on chart changes, clicks, and certain object dragging.
     if ((id == CHARTEVENT_CLICK) || (id == CHARTEVENT_CHART_CHANGE) || ((id == CHARTEVENT_OBJECT_DRAG) && 
